@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  xpressbees-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://xpressbees-db:3306/xpressbees?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=anshul@123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      xpressbees-db:
+        condition: service_healthy
+    networks:
+      - xpressbees-network
+
+  xpressbees-db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: anshul@123
+      MYSQL_DATABASE: xpressbees
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - xpressbees-network
+
+volumes:
+  mysql_data:
+
+networks:
+  xpressbees-network:
+    driver: bridge
